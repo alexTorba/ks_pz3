@@ -1,7 +1,7 @@
 import math
 
 
-def set_flow_rate():
+def set_flow_rate() -> tuple:
     flow_rates = list()
     index = 1
     while True:
@@ -21,10 +21,10 @@ def set_flow_rate():
     if len(flow_rates) == 0:
         raise Exception("Flow rates must have any value !")
 
-    return flow_rates
+    return tuple(flow_rates)
 
 
-def set_labor_input():
+def set_labor_input() -> tuple:
     labor_inputs = list()
     index = 1
     while True:
@@ -45,10 +45,10 @@ def set_labor_input():
     if len(labor_input) == 0:
         raise Exception("Labor input must have any values !")
 
-    return labor_inputs
+    return tuple(labor_inputs)
 
 
-def calc_bmin(flow_rates, labor_input, is_print=False):
+def calc_bmin(flow_rates: tuple, labor_input: tuple, is_print=False) -> float:
     if len(flow_rates) != len(labor_input):
         raise Exception("Each flow rate must have appropriate labor input !")
 
@@ -66,7 +66,7 @@ def calc_bmin(flow_rates, labor_input, is_print=False):
     return result
 
 
-def calc_bmin2(flow_rates, labor_input):
+def calc_bmin2(flow_rates: tuple, labor_input: tuple) -> float:
     if len(flow_rates) != len(labor_input):
         raise Exception("Each flow rate must have appropriate labor input !")
 
@@ -80,7 +80,7 @@ def calc_bmin2(flow_rates, labor_input):
     return result
 
 
-def calc_bopt(flow_rates, labor_input, is_print=False):
+def calc_bopt(flow_rates: tuple, labor_input: tuple, is_print=False) -> float:
     bmin = calc_bmin(flow_rates, labor_input)
     bmin2 = calc_bmin2(flow_rates, labor_input)
     k = 1
@@ -105,7 +105,7 @@ def calc_bopt(flow_rates, labor_input, is_print=False):
     return bopt
 
 
-def calc_sum_flow_rates(flow_rates, is_print=False):
+def calc_sum_flow_rates(flow_rates: tuple, is_print=False) -> int:
     _sum = sum(flow_rates)
     if is_print:
         str_print = "A = "
@@ -116,7 +116,7 @@ def calc_sum_flow_rates(flow_rates, is_print=False):
     return _sum
 
 
-def calc_time_service(bmin, labor_input, is_print=False):
+def calc_time_service(bmin: float, labor_input: tuple, is_print=False) -> tuple:
     time_service = list()
     index = 0
     for i in labor_input:
@@ -125,10 +125,10 @@ def calc_time_service(bmin, labor_input, is_print=False):
         if is_print:
             print("Q{0} = {1}".format(index, q))
         time_service.append(q)
-    return time_service
+    return tuple(time_service)
 
 
-def calc_second_time_service(time_service, is_print=False):
+def calc_second_time_service(time_service: tuple, is_print=False) -> tuple:
     second_time_service = list()
     index = 0
     for i in time_service:
@@ -138,10 +138,10 @@ def calc_second_time_service(time_service, is_print=False):
         if is_print:
             print("(Q^2){0} = {1}".format(index, q2))
         second_time_service.append(q2)
-    return second_time_service
+    return tuple(second_time_service)
 
 
-def calc_thread_loading(flow_rate, time_service, is_print=False):
+def calc_thread_loading(flow_rate: tuple, time_service: tuple, is_print=False) -> tuple:
     thread_loading = list()
     index = 0
     while index < len(flow_rate):
@@ -155,10 +155,10 @@ def calc_thread_loading(flow_rate, time_service, is_print=False):
             str_calc = "p{0} = {1}".format(index, p)
             print(str_calc)
         thread_loading.append(p)
-    return thread_loading
+    return tuple(thread_loading)  # to prevent changing collection
 
 
-def sum_thread_loading(thread_loading, is_print=False):
+def sum_thread_loading(thread_loading: tuple, is_print=False) -> int:
     sum_thread = sum(thread_loading)
     if is_print:
         str_print = " SumP ="
@@ -172,14 +172,11 @@ def sum_thread_loading(thread_loading, is_print=False):
     return sum_thread
 
 
-M1 = 1
-M2 = 1
-M3 = 1
-M = M1 + M2 + M3
-
-
-def calc_time_pending_ABSOLUTE(time_service, second_time_service, thread_loading, flow_rates):
-    for k in range(1, M1 + 1):
+def calc_time_pending_ABSOLUTE(time_service: tuple, second_time_service: tuple, thread_loading: tuple,
+                               flow_rates: tuple,
+                               thread_priority: tuple) -> float:
+    to = thread_priority[0] + 1  # M1 + 1
+    for k in range(1, to):
         rk_1 = calc_rk(k - 1, thread_loading)  # number of items to sum
         rk = calc_rk(k, thread_loading)
         qk = time_service[k - 1]
@@ -192,10 +189,18 @@ def calc_time_pending_ABSOLUTE(time_service, second_time_service, thread_loading
         w = foo + (sum_sts / (2 * (1 - rk_1) * (1 - rk)))
         print("W{k} = {rk_1} * {qk} / (1 - {rk_1}) + ({sum_sts} / (2 * (1 - {rk_1}) * (1 - {rk})) = {w}"
               .format(k=k, w=w, rk_1=rk_1, qk=qk, sum_sts=sum_sts, rk=rk))
+        return w
 
 
-def calc_time_pending_RELEVANT(time_service, second_time_service, thread_loading, flow_rates):
-    for k in range(M1 + 1, M1 + M2 + 1):
+def calc_time_pending_RELEVANT(time_service: tuple, second_time_service: tuple, thread_loading: tuple,
+                               flow_rates: tuple,
+                               thread_priority: tuple) -> float:
+    M1 = thread_priority[0]
+    f = M1 + 1  # M1 + 1
+    to = sum(thread_priority[:2]) + 1  # M1 + M2 + 1
+    M = sum(thread_priority)
+
+    for k in range(f, to):
         rm1 = calc_rk(M1, thread_loading)
         rk_1 = calc_rk(k - 1, thread_loading)
         rk = calc_rk(k, thread_loading)
@@ -209,10 +214,17 @@ def calc_time_pending_RELEVANT(time_service, second_time_service, thread_loading
         w = foo + (sum_sts / (2 * (1 - rk_1) * (1 - rk)))
         print("W{k} = {rm1} * {qk} / (1 - {rm1}) + ({sum_sts} / (2 * (1 - {rk_1}) * (1 - {rk})) = {w}"
               .format(k=k, w=w, rk_1=rk_1, qk=qk, sum_sts=sum_sts, rk=rk, rm1=rm1))
+        return w
 
 
-def calc_time_pending_NOPRIO(time_service, second_time_service, thread_loading, flow_rates):
-    for k in range(M1 + M2 + 1, M1 + M2 + M3 + 1):
+def calc_time_pending_NOPRIO(time_service: tuple, second_time_service: tuple, thread_loading: tuple, flow_rates: tuple,
+                             thread_priority: tuple) -> float:
+    M1 = thread_priority[0]
+    f = sum(thread_priority[:2]) + 1  # M1 + M2 + 1
+    to = sum(thread_priority[:3]) + 1  # M1 + M2 + M3 + 1
+    M = sum(thread_priority)
+
+    for k in range(f, to):
         rm1 = calc_rk(M1, thread_loading)
         rk_1 = calc_rk(k - 1, thread_loading)
         rk = calc_rk(k, thread_loading)
@@ -226,9 +238,10 @@ def calc_time_pending_NOPRIO(time_service, second_time_service, thread_loading, 
         w = foo + (sum_sts / (2 * (1 - rk_1) * (1 - rk)))
         print("W{k} = {rm1} * {qk} / (1 - {rm1}) + ({sum_sts} / (2 * (1 - {rk_1}) * (1 - {rk})) = {w}"
               .format(k=k, w=w, rk_1=rk_1, qk=qk, sum_sts=sum_sts, rk=rk, rm1=rm1))
+        return w
 
 
-def calc_rk(_k, _thread_loading):
+def calc_rk(_k: int, _thread_loading: tuple) -> float:
     summary = 0
     index = 0
     while index < _k:
@@ -237,7 +250,7 @@ def calc_rk(_k, _thread_loading):
     return round(summary, 8)
 
 
-def sum_second_time_service(second_time_service, flow_rates, k):
+def sum_second_time_service(second_time_service: tuple, flow_rates: tuple, k: int) -> int:
     index = 0
     sum_time = 0
     while index < k:
