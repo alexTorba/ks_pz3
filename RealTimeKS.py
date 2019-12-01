@@ -52,9 +52,8 @@ def calc_bmin(flow_rates: tuple, labor_input: tuple, is_print=False) -> float:
     if len(flow_rates) != len(labor_input):
         raise Exception("Each flow rate must have appropriate labor input !")
 
-    result = 0
+    result, index = 0
     count = len(flow_rates)
-    index = 0
     str_print = ""
     while index < count:
         result += flow_rates[index] * labor_input[index]
@@ -70,8 +69,7 @@ def calc_bmin2(flow_rates: tuple, labor_input: tuple) -> float:
     if len(flow_rates) != len(labor_input):
         raise Exception("Each flow rate must have appropriate labor input !")
 
-    result = 0
-    index = 0
+    result, index = 0
     count = len(flow_rates)
 
     while index < count:
@@ -242,8 +240,7 @@ def calc_time_pending_NOPRIO(time_service: tuple, second_time_service: tuple, th
 
 
 def calc_rk(_k: int, _thread_loading: tuple) -> float:
-    summary = 0
-    index = 0
+    summary, index = 0
     while index < _k:
         summary += _thread_loading[index]
         index += 1
@@ -251,8 +248,7 @@ def calc_rk(_k: int, _thread_loading: tuple) -> float:
 
 
 def sum_second_time_service(second_time_service: tuple, flow_rates: tuple, k: int) -> int:
-    index = 0
-    sum_time = 0
+    index, sum_time = 0
     while index < k:
         sum_time += second_time_service[index] * flow_rates[index]
         index += 1

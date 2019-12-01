@@ -25,4 +25,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    input("enter to exit")
+    input("Enter any key to exit")
